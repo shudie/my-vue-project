@@ -1,8 +1,9 @@
 'use strict'
+const webpack = require('webpack')
 const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
-const vueLoaderConfig = require('./vue-loader.conf')
+const vueLoaderConfig = require('./vue-loader.conf') 
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -36,11 +37,23 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
+      'styles': resolve('src/assets/styles'),
+      'images': resolve('src/assets/images'),
+      'components': resolve('src/pages/components'),
+      'img': resolve('static/img'),
+      'css': resolve('static/css'),
     }
   },
+  plugins: [  
+    new webpack.ProvidePlugin({  
+        mui: "mui",  
+        "window.mui": "mui"  
+    })  
+  ],  
+
   module: {
     rules: [
-      ...(config.dev.useEslint ? [createLintingRule()] : []),
+      // ...(config.dev.useEslint ? [createLintingRule()] : []),
       {
         test: /\.vue$/,
         loader: 'vue-loader',
@@ -74,6 +87,10 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
+      },
+      {
+        test: /\.less$/,
+        loader: "style-loader!css-loader!less-loader",
       }
     ]
   },
