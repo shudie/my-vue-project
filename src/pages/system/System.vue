@@ -32,7 +32,35 @@
                 </ul>
             </div>
             <div class="content">
-
+                <el-table
+                :data="tableData"
+                style="width: 100%">
+                <el-table-column
+                    prop="id"
+                    label="序号"
+                    width="180">
+                </el-table-column>
+                <el-table-column
+                    prop="gmtCreated"
+                    label="日期"
+                    width="180">
+                </el-table-column>
+                <el-table-column
+                    prop="introduce"
+                    label="描述">
+                </el-table-column>
+                </el-table>
+                <div class="block">
+                    <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        layout="prev, pager, next, sizes"
+                        :total="50"
+                        :current-page="current"
+                        :page-size="pageNum"
+                        :page-sizes=[2,3,4,10]>
+                    </el-pagination>
+                </div>
             </div>
         </div>
         
@@ -41,7 +69,73 @@
 
 <script>
 export default {
-    name: 'System'
+    name: 'System',
+    data() {
+        return {
+            tableData:[],
+            pageNum:3, //每页条数
+            total: 0, //总数
+            current: 1, //当前页数
+        }
+    },
+    methods: {
+        // post() {
+        //     this.axios.post('http://demo.shenzhuo.vip:31766/LeTuoShopMiddleConsole/sysUserGetInfo/getSysqa',{
+        //         // pageIndex: 5,
+        //         pageNum: 3
+        //     }).then((res)=>{
+        //         this.tableData = res.data.data
+        //         console.info('测试接口返回的数据',res)
+        //     }).catch(()=>{
+        //         console.info('请求失败')
+        //     })
+        // },
+        post(){            
+            return this.axios({
+                method: 'post',
+                url: 'http://demo.shenzhuo.vip:31766/LeTuoShopMiddleConsole/sysUserGetInfo/getSysqa',  //url是后台接口路径
+                data: {
+                    pageNum: this.pageNum,  //每页条数
+                    total: 0, //总数
+                    pageIndex:this.current, //当前页数 pageIndex后台要的字段名 前端获取的页数this.current
+                },
+                transformRequest: [function (data) {
+                    let ret = '';
+                    for (let it in data) {
+                        ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+                    }
+                    return ret
+                }],
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+                
+            }).then(res =>{
+                this.tableData = res.data.data
+                console.info('接口返回的数据',res)
+            })
+        },
+        // 切换每页多少条
+        handleSizeChange(val){
+            console.info('每页多少条:',val);
+            console.log('this.pageSize')
+            this.pageNum = val
+        // 切换每页多少条的时候当前页数要变成1  例如切[1,2,3,4,5,10,20]之中的某一页
+            this.current = 1
+        //  // 获取数据列表-调用名称会变
+            this.post();
+        },
+        // 当前页
+        handleCurrentChange(val){
+            console.info('当前页',val);
+            this.current = val
+            // 获取数据列表-调用名称会变
+            this.post();
+        },
+    },
+    mounted() {
+        this.post();
+    }
 }
 </script>
 
@@ -108,9 +202,15 @@ export default {
         color: #333;
         padding: 15px 0;
         text-align: center;
+        cursor: pointer;
     }
     .content {
         width: 80%;
         float: left;
+    }
+    .block {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
     }
 </style>
